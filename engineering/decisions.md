@@ -3,6 +3,33 @@
 Append-only. Each entry states what was chosen, what was rejected, and why. Entries are never
 edited away; a reversed decision gets a new entry and the old one is marked superseded.
 
+## 2026-08-02 — Agent boundary is the Agent Client Protocol, via the claude-agent-acp sidecar
+
+**Chosen**: the `agent` module is an ACP client (official Rust SDK) managing a Node sidecar
+process running `agentclientprotocol/claude-agent-acp`, which wraps the official Claude Agent
+SDK in subscription mode. Future backends are any ACP-speaking agent.
+**Rejected**: driving `claude -p --output-format stream-json` directly.
+**Why**: ACP makes sessions, streaming, MCP configuration, and permissions protocol
+primitives instead of re-derived semantics over a weaker interface, and it keeps subscription
+auth as a pass-through to Anthropic's own SDK. Accepted cost: a Node runtime and a
+community-governed dependency.
+
+## 2026-08-02 — UI framework is React
+
+**Chosen**: React for the TypeScript browser app.
+**Rejected**: Svelte.
+**Why**: best-supported framework under Bazel's rules_ts/rules_js toolchain — the build
+system is fixed — and the largest ecosystem for the session/chat UI. Weight accepted.
+
+## 2026-08-02 — Persistence is SQLite
+
+**Chosen**: a single SQLite database for sessions, transcripts, evidence metadata, bindings,
+and the retained printer-document interpretation, with full-text session search via FTS;
+uploaded evidence files live on disk beside it.
+**Rejected**: plain JSON/files.
+**Why**: search, atomic writes, and migrations come built in, and backup is copying one file;
+the bundled C dependency is Bazel-friendly.
+
 ## 2026-08-02 — Backend in Rust
 
 **Chosen**: the system is built in Rust; Bazel remains the build system, and the browser UI

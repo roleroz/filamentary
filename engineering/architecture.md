@@ -6,7 +6,7 @@ This section holds only open items — a topic that is absent is settled and rec
 
 **No open decisions.**
 
-Changes since last approval: none — this version was approved on 2026-08-02.
+Changes since last approval: none — this version was approved on 2026-08-08.
 
 ## 1. Modules
 
@@ -27,12 +27,13 @@ graph LR
     SRV --> PRN[printer]
     SES --> AGT[agent]
     SES -->|validate + index uploads| FIL
-    SES -->|binding match| PRN
+    SES -->|binding match + freshness events| PRN
     AGT -->|ACP: JSON-RPC over stdio| BCK[(claude-agent-acp sidecar)]
+    AGT -->|endpoint provisioning + revocation| MCP
     BCK -->|MCP| MCP[mcp]
     MCP --> FIL[fileindex]
     MCP --> PRN
-    MCP -->|attach snapshots| SES
+    MCP -->|attach snapshots; evidence + binding + camera lookups| SES
     PRN -->|read-only HTTP| MR[(Moonraker)]
     PRN -->|snapshot fetch| CAM[(webcams)]
     PRN -->|interpretation| AGT
@@ -41,7 +42,7 @@ graph LR
 - A user message flows `ui → server → sessions → agent → backend`; streamed output flows back the same path and fans out to every connected device.
 - An upload flows `ui → server → sessions`: `sessions` validates images itself, hands `.3mf` and gcode to `fileindex` for validation and indexing under the upload's identifier, and on a `.3mf` runs the automatic binding match against `printer`'s interpreted list.
 - Confirmed session deletion is driven by `sessions`: it removes the session's rows and on-disk evidence files and tells `fileindex` to drop the session's indexed uploads (R4).
-- The backend reaches Filamentary's tools only through `mcp`; `mcp` enforces nothing itself — gating lives with the owners (`printer` gates agent snapshots on print state and bounds telemetry and log views, `fileindex` bounds every file view).
+- The backend reaches Filamentary's tools only through `mcp`; tool semantics are enforced by their owners (`printer` gates agent snapshots on print state and bounds telemetry and log views, `fileindex` bounds every file view), while `mcp` enforces only its own scoping duties per the contracts: per-session endpoint scoping, the binding gate on printer-facing tools, and the file-kind restriction on evidence read-back.
 - Captured snapshots are attached by `sessions` as evidence with provenance (R7): on the user path `server` hands the capture over; on the agent path `mcp` does, returning the reference to the backend.
 - The session's camera choice is `sessions` state, carried on each capture request; `printer` falls back to the first discovered camera when no choice is set (R7).
 - `sessions` is the sole transcript writer. `agent` relays the backend's tool-call and tool-result events (ACP session updates) to `sessions` alongside streamed text, which is how MCP calls become transcript-visible (R5, R10); `mcp` writes no transcript entries.
@@ -76,4 +77,4 @@ Everything inside those boundaries is real in every suite. The three suites are 
 
 ## 5. Tasks
 
-Written after the module design docs are approved; cross-module tasks will be listed here, single-module tasks in their module's design doc, per the pipeline rules.
+Written after the module design docs are approved, in `engineering/tasks.md`, per the pipeline rules.

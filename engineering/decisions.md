@@ -227,3 +227,109 @@ against photos of the print.
 **Rejected**: measurements only.
 **Why**: visual comparison of intended-versus-printed shape is central to R9's photo-driven
 debugging; a software-rendering dependency is an accepted cost.
+
+## 2026-08-08 — Newest named upload supersedes an older deferred evaluation
+
+**Chosen**: at most one binding evaluation is ever outstanding — the newest named `.3mf`
+upload's; a newer named upload supersedes an older upload's uncompleted evaluation, which
+completes as a no-effect "superseded" (no state change, no note).
+**Rejected**: strict upload-order completion, where every deferred evaluation completes with
+its full outcome in sequence.
+**Why**: a superseded evaluation's only possible effect is overwriting newer truth with
+staler — and strict ordering would make a corrected re-slice wait behind a stale deferred
+evaluation while the printer list is unavailable, delaying the bind the user is waiting for.
+Supersession also dissolves the contradiction between "positive outcomes complete on any
+serving list" and "no upload skips past an earlier deferred one" that the review loop
+plateaued on.
+
+## 2026-08-08 — Camera choice scoped to the printer it was chosen on
+
+**Chosen**: the stored camera choice records, at set time, its printer's canonical name and
+telemetry URL; a capture whose target printer differs in either is refused with a structured
+out-of-scope error naming the choice's printer — never a capture from any camera. No
+binding-side trigger clears the choice.
+**Rejected**: the binding contract reporting resolved-printer changes to a printer-state
+clearing trigger (the prior design).
+**Why**: printer identity beyond the canonical name does not exist in the data, so a
+change-detection trigger cannot distinguish a rename from a reassignment and misses a URL
+re-pointed at a different machine — the exact case where a stale choice silently captures
+another printer's camera. Capture-time scope validation is stateless, closes the URL hole,
+and deletes a cross-contract seam; the cost is one re-pick after a rename, chosen as safety
+over convenience.
+
+## 2026-08-08 — The unbound session's evaluation stands, re-deriving on every Fresh list
+
+**Chosen**: the newest named upload's evaluation stands while the session is unbound: each
+Fresh list re-derives its outcome, so a document edit that adds the missing printer binds the
+session automatically with no re-upload, and stale candidates or notes refresh with the
+document. It ends when an outcome binds the session, a manual bind lands, or a newer named
+upload replaces it; on a bound session an evaluation completes exactly once.
+**Rejected**: one-shot evaluations, where a completed no-match or ambiguous outcome stays
+frozen until the next upload.
+**Why**: frozen outcomes strand stale annotations — after the user fixes the document, the
+session still shows candidates the document may no longer carry, contradicting "a note never
+outlives the situation it describes" — and make the user re-upload a file the system already
+holds to get the bind they already asked for. The standing rule is also symmetric with the
+judgment machinery, which already re-derives a bound session's state on every Fresh list.
+
+## 2026-08-08 — Cross-seam conventions extracted into one document; completeness sweeps replace further sampling rounds
+
+**Chosen**: the rules universal to every seam (unknown-session outcomes, bounded resolution,
+structured error arms, fault-class versus validity errors, crash-atomicity and re-drive,
+per-entity serialization, emission discipline, and standard test conventions) move to
+`engineering/contracts/conventions.md`, cited by every contract and approved with the batch;
+and the plateaued review loops are unblocked by one deterministic completeness sweep per
+document (operations × failure axes, prose claims mapped to obligations) plus a cross-document
+vocabulary coherence pass, before any further review rounds.
+**Rejected**: keeping the universal rules restated per contract, and continuing stochastic
+single-reviewer rounds until the coverage matrix exhausts by accident.
+**Why**: the finding stream was dominated by per-operation rediscovery of the same universal
+rules and by unsampled cells of each contract's coverage matrix — per-doc restatement made
+every operation a chance to miss a carry, and sampling rounds converge only stochastically.
+One normative home plus one deterministic sweep closes both classes at the root. Also adopted
+as a standing development-process rule in the global config.
+
+## 2026-08-08 — Standing evaluation extended: it stands until a manual bind
+
+**Chosen**: the newest named upload's evaluation stands while the session is unbound *or
+automatically bound*, re-deriving on every Fresh list — a document edit can clear a stale
+mismatch note or re-bind an auto-bound session to a newly unique match. Only a manual bind
+(or a newer named upload) ends it; a manually bound session's evaluation completes exactly
+once. Extends the same-day "unbound session's evaluation stands" decision, which stopped at
+the first bind.
+**Rejected**: ending the standing evaluation at any bind, automatic included.
+**Why**: stopping at an automatic bind left the auto-bound session's mismatch note frozen —
+it could describe a name the edited document now matches, permanently, contradicting "a note
+never outlives the situation it describes". Automatic binding follows the document by
+definition, so its annotations and re-binds should track the document too; manual binds are
+the user's explicit override and stay untouched.
+
+## 2026-08-08 — Binding state becomes a pure derivation
+
+**Chosen**: binding.md is rewritten around derived state: the reported state, judgment,
+annotations, and pending causes are computed from four inputs — the stored name + manual flag
+(the only binding write, by bind or auto-bind), the newest named upload postdating that bind,
+and printer-state's retained list with its freshness. Events emit when the derived output
+changes; there are no stored judgments, no evaluation-completion machinery, no deferral queue.
+**Rejected**: keeping the event-sourced model (stored judgments written on Fresh arrivals,
+evaluations as completing acts, deferral triggers) and patching its round-11 findings.
+**Why**: eleven Opus rounds plateaued at 6–10 findings through two structural passes, with the
+last round dominated by pairwise interactions between the model's own sub-machines. A pure
+derivation deletes the interaction surface: one write path, one emit rule, causes named by
+whichever input is missing, and the approved standing-evaluation behaviour falls out by
+construction instead of by trigger rules.
+
+## 2026-08-08 — Review convergence by blocking bar; evidence fixed blockers-only with a session-blind fileindex
+
+**Chosen**: review findings block acceptance only when an observable outcome is contradicted,
+unsatisfiable, or undefined; everything else is fixed silently when trivial or rejected into
+the ledger, and a round with no blocking findings converges the document. For the evidence
+contract, only round 12's genuine blockers were fixed — chiefly declaring `fileindex`
+session-blind, with session existence resolved by its callers before it is consulted — and
+the earlier-proposed full dedup rewrite was dropped as unnecessary under the bar.
+**Rejected**: continuing accept-everything review rounds (roughly forty rounds produced an
+empty rejected-findings ledger and no termination), and the full evidence restructure.
+**Why**: the loop's termination condition was reviewer-judged, and adversarial reviewers of a
+sizeable document always return something defensible; without triage the loop cannot
+terminate and every fix grows the surface. The bar restores the triage step the process
+always specified. Also adopted as a standing rule in the global config.

@@ -1,21 +1,16 @@
 # Filamentary — Design Language
 
-Reference for anyone (human or agent) writing UI or documentation for Filamentary, the 3D printer
-calibration and debugging assistant. Scope: brand, visual system, UI patterns, and voice.
+Reference for anyone (human or agent) writing UI or documentation for Filamentary, the 3D printer calibration and debugging assistant. Scope: brand, visual system, UI patterns, and voice.
 
-The product is a diagnostic instrument that can send G-code to a hot machine. Everything below
-serves two ideas: **evidence over opinion**, and **nothing happens without a deliberate yes**.
+The product is a diagnostic instrument that can send G-code to a hot machine. Everything below serves two ideas: **evidence over opinion**, and **nothing happens without a deliberate yes**.
 
 ---
 
 ## 1. Brand
 
-**Name:** Filamentary — *filament* + *elementary*. Detective register, never cute-detective.
-Write it as one word, capital F, no tagline in product chrome. The descriptor `Print diagnosis`
-may appear under the wordmark in marketing lockups only.
+**Name:** Filamentary — *filament* + *elementary*. Detective register, never cute-detective. Write it as one word, capital F, no tagline in product chrome. The descriptor `Print diagnosis` may appear under the wordmark in marketing lockups only.
 
-**Mark:** a magnifier whose handle is a strand of filament; the lens shows three layer lines.
-Ring and handle take the surrounding text colour; the evidence lines are the accent.
+**Mark:** a magnifier whose handle is a strand of filament; the lens shows three layer lines. Ring and handle take the surrounding text colour; the evidence lines are the accent.
 
 ```svg
 <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -27,30 +22,14 @@ Ring and handle take the surrounding text colour; the evidence lines are the acc
 
 Rules:
 
-- **Ring and handle share one stroke weight** (8 at 120px; evidence lines 5). Round caps
-  everywhere — the handle must read as extruded plastic.
-- **The handle is anchored on the ring's centreline** — its first point is at 45° on the
-  circle's own radius (30), never offset. Because the two strokes match in width, the handle's
-  inner and outer edges land flush with the ring's, and nothing intrudes into the glass. When
-  the ring thickens at small sizes, the handle thickens with it; the anchor never moves.
+- **Ring and handle share one stroke weight** (8 at 120px; evidence lines 5). Round caps everywhere — the handle must read as extruded plastic.
+- **The handle is anchored on the ring's centreline** — its first point is at 45° on the circle's own radius (30), never offset. Because the two strokes match in width, the handle's inner and outer edges land flush with the ring's, and nothing intrudes into the glass. When the ring thickens at small sizes, the handle thickens with it; the anchor never moves.
 - **Clear space** on all sides equals the lens radius.
-- **Size ladder** — detail drops as it shrinks, strokes thicken to compensate:
-  | Size | Evidence lines | Ring + handle stroke |
-  | --- | --- | --- |
-  | ≥64px | 3 | 8 |
-  | 32–63px | 2 | 9 |
-  | 24–31px | 1 | 11 |
-  | 16px | 0, handle truncated after the kink | 14 |
-- **Icon tiles** (favicon, app icon) are white, with the mark in `--dark` and the evidence
-  lines in `--accent` — the only spot of colour. No orange tile; it reads heavy under a mask.
-- **One-colour cutdowns** (engraving, printed parts, monochrome bars): everything in one colour,
-  evidence lines at 45% opacity so they never out-shout the ring.
-- Ready-made files live in `brand/` — `mark/` (on-dark, on-light, mono, currentColor, and
-  size-optimised 32/24/16), `lockup/`, `favicon.svg`, `app-icon.svg`. Use the size-optimised
-  files rather than scaling the primary.
-- Never: rotate it, add a gradient, put it in a circle badge, restyle the handle as a straight
-  stick, move the handle anchor off the ring, or set the wordmark in a font other than
-  Bricolage Grotesque.
+- **Size ladder** — detail drops as it shrinks, strokes thicken to compensate: | Size | Evidence lines | Ring + handle stroke | | --- | --- | --- | | ≥64px | 3 | 8 | | 32–63px | 2 | 9 | | 24–31px | 1 | 11 | | 16px | 0, handle truncated after the kink | 14 |
+- **Icon tiles** (favicon, app icon) are white, with the mark in `--dark` and the evidence lines in `--accent` — the only spot of colour. No orange tile; it reads heavy under a mask.
+- **One-colour cutdowns** (engraving, printed parts, monochrome bars): everything in one colour, evidence lines at 45% opacity so they never out-shout the ring.
+- Ready-made files live in `brand/` — `mark/` (on-dark, on-light, mono, currentColor, and size-optimised 32/24/16), `lockup/`, `favicon.svg`, `app-icon.svg`. Use the size-optimised files rather than scaling the primary.
+- Never: rotate it, add a gradient, put it in a circle badge, restyle the handle as a straight stick, move the handle anchor off the ring, or set the wordmark in a font other than Bricolage Grotesque.
 
 ---
 
@@ -76,24 +55,18 @@ Dark-first. The product is used in a workshop and on a phone at arm's length in 
 
 Discipline:
 
-- **One accent.** `--accent` is filament orange and belongs to the primary action on a view.
-  If two things on screen are orange, one of them is wrong.
+- **One accent.** `--accent` is filament orange and belongs to the primary action on a view. If two things on screen are orange, one of them is wrong.
 - Status colours are for status, never for decoration. `--ok` never fills a button.
-- No gradients, no coloured shadows, no tinted glass. Depth comes from `--surface` steps and
-  hairline borders.
+- No gradients, no coloured shadows, no tinted glass. Depth comes from `--surface` steps and hairline borders.
 - Text on `--accent` is always `#121317`, never white.
-- Light surfaces (`--ink` as a background) exist for print, PDF summaries, and the marketing
-  site. In-app light mode is not a goal.
+- Light surfaces (`--ink` as a background) exist for print, PDF summaries, and the marketing site. In-app light mode is not a goal.
 
 ---
 
 ## 3. Type
 
-- **Bricolage Grotesque** — UI and headings. 700/800 for headings, 500–600 for UI.
-  Letter-spacing `-0.03em` at 24px and above, `0` below.
-- **JetBrains Mono** — anything the machine said or the user must copy verbatim: G-code,
-  config snippets, file names, layer numbers, measurements, IDs. Also small uppercase labels at
-  `letter-spacing: 0.16em`.
+- **Bricolage Grotesque** — UI and headings. 700/800 for headings, 500–600 for UI. Letter-spacing `-0.03em` at 24px and above, `0` below.
+- **JetBrains Mono** — anything the machine said or the user must copy verbatim: G-code, config snippets, file names, layer numbers, measurements, IDs. Also small uppercase labels at `letter-spacing: 0.16em`.
 
 | Role | Size / weight |
 | --- | --- |
@@ -113,8 +86,7 @@ Never below 13px on phone. Tap targets never below 44px. `text-wrap: pretty` on 
 - 4px base grid; spacing steps 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64.
 - Radii: 8 (chips, inputs) · 12 (buttons) · 20 (cards) · 26 (sheets, phone panels) · 999 (pills).
 - Sibling groups are laid out with flex/grid + `gap`, never with margins on each child.
-- Phone first: single column, thumb-reachable primary action, no horizontal scroll. Desktop is
-  the same column plus a session rail — not a different information architecture.
+- Phone first: single column, thumb-reachable primary action, no horizontal scroll. Desktop is the same column plus a session rail — not a different information architecture.
 - Content max width for prose: ~72ch.
 
 ---
@@ -123,34 +95,19 @@ Never below 13px on phone. Tap targets never below 44px. `text-wrap: pretty` on 
 
 These encode requirements from the spec. Do not invent alternatives.
 
-**Confirmation gate.** Every printer write is a distinct, unmistakable card: the exact commands
-in mono, one sentence of plain-language effect, then `Approve` (accent, filled) / `Reject`
-(outlined). One card per action — there is never an "approve all". A dangerous action
-(unhomed motion, out-of-limit move, cold extrude, heater safety change) gets a `--danger` left
-rule, a `--danger` label reading what could go wrong, and a longer press target.
+**Confirmation gate.** Every printer write is a distinct, unmistakable card: the exact commands in mono, one sentence of plain-language effect, then `Approve` (accent, filled) / `Reject` (outlined). One card per action — there is never an "approve all". A dangerous action (unhomed motion, out-of-limit move, cold extrude, heater safety change) gets a `--danger` left rule, a `--danger` label reading what could go wrong, and a longer press target.
 
-**Emergency stop.** Always visible while a printer is connected, top-right of the app frame,
-outside the conversation. `--danger`, mono uppercase label, never scrolls away, never disabled.
+**Emergency stop.** Always visible while a printer is connected, top-right of the app frame, outside the conversation. `--danger`, mono uppercase label, never scrolls away, never disabled.
 
-**Provenance.** Any machine value shown carries its source and age as a mono caption:
-`live · read 12s ago`, `saved config · 3d ago`, `snapshot · 2026-07-14`. The stale `--warn`
-rendering applies only to values that carry an expected-fresh window (telemetry); capture-time
-provenance — snapshots, uploads — always shows its capture time and is never judged stale.
-The knowledge-base document is never quoted as a current value.
+**Provenance.** Any machine value shown carries its source and age as a mono caption: `live · read 12s ago`, `saved config · 3d ago`, `snapshot · 2026-07-14`. The stale `--warn` rendering applies only to values that carry an expected-fresh window (telemetry); capture-time provenance — snapshots, uploads — always shows its capture time and is never judged stale. The knowledge-base document is never quoted as a current value.
 
-**Certainty.** Distinguish three registers visually and in copy: *established* (plain text,
-cites the artifact), *hypothesis* (prefixed "Likely —", `--ink-2`), *external* (a bordered
-citation block with the source domain, always ranked below first-hand evidence).
+**Certainty.** Distinguish three registers visually and in copy: *established* (plain text, cites the artifact), *hypothesis* (prefixed "Likely —", `--ink-2`), *external* (a bordered citation block with the source domain, always ranked below first-hand evidence).
 
-**Evidence quality.** When a photo cannot support a conclusion, the system says which conclusion
-and what a usable shot looks like — an actionable request card, not a generic "image unclear".
+**Evidence quality.** When a photo cannot support a conclusion, the system says which conclusion and what a usable shot looks like — an actionable request card, not a generic "image unclear".
 
-**Degraded mode.** When a printer is unreachable, a persistent bar states it plainly and lists
-what is unavailable. Questions about runtime state are declined, never answered from saved
-values.
+**Degraded mode.** When a printer is unreachable, a persistent bar states it plainly and lists what is unavailable. Questions about runtime state are declined, never answered from saved values.
 
-**Progress.** Uploads, ingestion, indexing and model responses always show motion. A multi-second
-silent wait is a defect. Streaming text, determinate bars for uploads, mono byte counts.
+**Progress.** Uploads, ingestion, indexing and model responses always show motion. A multi-second silent wait is a defect. Streaming text, determinate bars for uploads, mono byte counts.
 
 **Mode badge.** `LOCAL` (`--ok`) or `EXPOSED` (`--accent`) pill in the header at all times.
 
@@ -161,16 +118,11 @@ silent wait is a defect. Streaming text, determinate bars for uploads, mono byte
 Direct, technical, unhurried. The reader owns the printer and knows Klipper.
 
 - Lead with the finding, then the evidence, then the change. Never a list of generic causes.
-- Name things exactly: settings by their OrcaSlicer name, values with units, layers by number
-  and Z height, files by name.
-- Say what you don't know. "The photo shows the shift but not the surface finish" beats a
-  confident guess.
-- No exclamation marks, no emoji, no "Great question", no apologising. Errors state what
-  happened, what it means, and what to do.
-- Filament recommendations always name **both** the filament and the printer they were
-  established on.
-- Documentation: second person, present tense, sentence case headings, mono for every path,
-  command, and setting name. Short paragraphs; tables over bullet lists when comparing.
+- Name things exactly: settings by their OrcaSlicer name, values with units, layers by number and Z height, files by name.
+- Say what you don't know. "The photo shows the shift but not the surface finish" beats a confident guess.
+- No exclamation marks, no emoji, no "Great question", no apologising. Errors state what happened, what it means, and what to do.
+- Filament recommendations always name **both** the filament and the printer they were established on.
+- Documentation: second person, present tense, sentence case headings, mono for every path, command, and setting name. Short paragraphs; tables over bullet lists when comparing.
 
 ---
 

@@ -17,8 +17,6 @@ Notes:
 
 - Colours: filament orange `#FF6A3D`, ink `#F2ECE2`, dark `#121317`.
 - Clear space on every side = the lens radius.
-- Ring and handle carry the same stroke weight, and the handle is anchored on the ring's
-  centreline (45°, radius 30) so their edges run flush.
-- Lockup wordmarks are live text in **Bricolage Grotesque 700**. Install the font, or convert
-  the text to outlines before handing the file to anyone who won't have it.
+- Ring and handle carry the same stroke weight, and the handle is anchored on the ring's centreline (45°, radius 30) so their edges run flush.
+- Lockup wordmarks are live text in **Bricolage Grotesque 700**. Install the font, or convert the text to outlines before handing the file to anyone who won't have it.
 - Below 64px use the size-optimised marks: strokes thicken and evidence lines drop (3 → 2 → 1 → 0).

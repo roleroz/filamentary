@@ -200,3 +200,30 @@ and there is no login. The UI shows the `LOCAL`/`EXPOSED` badge.
 **Rejected**: a shared token/password (e.g. QR-scanned from the phone).
 **Why**: single user on a trusted home network; authentication is complexity v1 does not need.
 It moves to future work alongside any exposure beyond the LAN.
+
+## 2026-08-02 — Sidecar vendored and pinned into the build
+
+**Chosen**: the `claude-agent-acp` adapter and its npm dependency tree are pinned by lockfile
+and vendored into the build via Bazel rules_js; hosts need only a Node runtime, verified at
+startup with a clear failure message.
+**Rejected**: fetching the adapter via `npx` at run time.
+**Why**: the app ships the exact adapter it was tested with — hermetic, offline-installable,
+and consistent with the pin-everything rule; runtime fetching is unpinned by nature.
+
+## 2026-08-02 — XDG locations with a TOML config file
+
+**Chosen**: configuration at `~/.config/filamentary/config.toml` with flag > env > file >
+default precedence; the SQLite database and evidence files under
+`~/.local/share/filamentary/`; the service log at `~/.local/state/filamentary/`.
+**Rejected**: CLI flags only with data beside the binary.
+**Why**: platform convention, one directory to back up, and data decoupled from the install
+location.
+
+## 2026-08-02 — Mesh geometry exposed as rendered views plus measurements
+
+**Chosen**: `fileindex` keeps the `.3mf` mesh and exposes it as numeric measurements and
+on-demand rendered images from named viewpoints, so the agent can compare intended geometry
+against photos of the print.
+**Rejected**: measurements only.
+**Why**: visual comparison of intended-versus-printed shape is central to R9's photo-driven
+debugging; a software-rendering dependency is an accepted cost.

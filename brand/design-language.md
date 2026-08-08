@@ -71,7 +71,7 @@ Dark-first. The product is used in a workshop and on a phone at arm's length in 
 | `--ink-4` | `#5C616E` | Captions on dark wells, disabled |
 | `--accent` | `#FF6A3D` | The filament. Primary action, active state, brand |
 | `--ok` | `#3DDC97` | Connected, approved, complete |
-| `--warn` | `#F2B705` | Stale snapshot, degraded mode, weak evidence |
+| `--warn` | `#F2B705` | Stale telemetry, degraded mode, weak evidence |
 | `--danger` | `#FF4D4D` | Emergency stop, dangerous action, error |
 
 Discipline:
@@ -133,8 +133,10 @@ rule, a `--danger` label reading what could go wrong, and a longer press target.
 outside the conversation. `--danger`, mono uppercase label, never scrolls away, never disabled.
 
 **Provenance.** Any machine value shown carries its source and age as a mono caption:
-`live · read 12s ago`, `saved config · 3d ago`, `snapshot · 2026-07-14`. A stale source renders
-the caption in `--warn`. The knowledge-base document is never quoted as a current value.
+`live · read 12s ago`, `saved config · 3d ago`, `snapshot · 2026-07-14`. The stale `--warn`
+rendering applies only to values that carry an expected-fresh window (telemetry); capture-time
+provenance — snapshots, uploads — always shows its capture time and is never judged stale.
+The knowledge-base document is never quoted as a current value.
 
 **Certainty.** Distinguish three registers visually and in copy: *established* (plain text,
 cites the artifact), *hypothesis* (prefixed "Likely —", `--ink-2`), *external* (a bordered

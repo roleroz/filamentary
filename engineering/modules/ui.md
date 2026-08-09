@@ -1,0 +1,56 @@
+# Module design — `ui`
+
+## Decisions needed from you
+
+This section holds only open items — a topic that is absent is settled and recorded in `engineering/decisions.md`, not forgotten.
+
+**No open decisions.**
+
+Changes since last approval: none — this version was approved on 2026-08-08.
+
+## 1. Purpose
+
+The TypeScript browser app, per the architecture: phone-first, React, styled and structured by `brand/design-language.md`. Its observable behaviour is fixed by the contracts (the events contract's client rules, the binding contract's `ui` column, R10's rendering requirements); this document covers the client architecture that delivers it.
+
+## 2. Internals
+
+- **Screens** — session list (search, archive with the show-archived selector revealing archived sessions in the list and in search per R4, create-with-first-message), session view (transcript, composer with attachments and the per-message cap surfaced, evidence gallery, binding control, camera controls), printers screen (list, reachability, freshness with cause, telemetry, and the per-printer Klipper log and config views — bounded, continuable reads rendered with provenance per printer-state, R6's "shown in the UI"), and the config surface (document location state, with the set control that writes the location live through `server`'s set route — the unset state's remedy is on the surface itself). A persistent header — shared chrome on every screen — carries the LOCAL/EXPOSED badge at all times, per the brand doc. The session view carries the brand doc's degraded-mode bar for an unreachable bound printer (R6 — the session keeps running on evidence) and the permanent no-telemetry notice for an evidence-only one (R3); every member of printer-state's reachability and freshness closed sets has a rendering, causes included.
+- **Sync store** — the one stateful core, implementing the events contract's client rules: fetch-then-subscribe on load, token holding and comparison, resync-required → refetch over the open stream, dedup by entity/entry key (apply-twice-renders-once), per-scope commit-order application, delta assembly (head rule; in-order chunks per entry key), turn indicator from ephemerals + the turn-in-flight flag + fetched state, heartbeat watchdog driving the disconnected indicator. Everything else renders from this store; screens hold no sync logic.
+- **Renderers** — one per transcript entry kind (the events contract's closed set); the typed register (R9) renders from the structured payload *within* a text-segment entry — parsed markup content, never a new entry kind; the payload's shape is the emitter's to define per the events contract (payloads render "against the emitting module's fixtures"), and `sessions`' design doc defines this one — as two distinct brand-doc patterns: findings carry the three certainty registers (established, hypothesis, external) visually distinct, and evidence requests render as actionable request cards naming what a usable shot looks like, never certainty-badged and never a generic "image unclear"; failure entries render cause and remedy verbatim from the structured payload with the retry control (R2.1's retriable failed message — `sessions.retry` behind it); one per binding state per the contract's `ui` column; provenance captions on evidence and telemetry staleness judgment at view time on fresh-window-bearing values (the brand-doc pattern). The camera control derives from (binding state, reachability, discovery): absent when discovery answers no webcam — never a dead control (R7) — disabled with the reason shown when discovery is unknowable, live when bound with discovered cameras, a picker when several; the six snapshot refusal reasons — out-of-scope, no-camera, unknown-camera, unreachable, and the two agent-path reasons (idle and undeterminable, mutually distinct per printer-state) — each render distinctly, as do the two capture *failure* classes beyond the refusals: the transient fetch failure (cause shown, retry offered, per R7/R10) and evidence's capture-failed decode error (camera-named, distinct from the fetch failure); camera-choice-changed events apply through the store like any durable kind.
+- **Capture flow** — phone photo via the file-input capture attribute into the upload route, with the brand doc's determinate progress bar and byte count during the upload (a multi-second silent wait is a defect); webcam snapshot via the snapshot route; both land in the gallery through the store's evidence-added handling.
+- **Gallery pagination** — the gallery pages `evidence_list` per the evidence contract and composes with live evidence-added events by the paginated half of the events contract's gapless rule: identifier-keyed dedup absorbs an event that lands in a later-fetched page, and a refused continuation (a service-run boundary) restarts the listing from the first page — never duplicated or lost items. The session list pages the session-store contract's listing under the same rule: session-keyed dedup absorbs a session-created or archive-changed event racing the pagination, and a refused continuation restarts the listing. Search composes only where the event decides membership, per that contract's split: archive changes and renames of already-listed rows apply live, while a session created during an active content search is *not* rendered from the event (content-match membership is undecidable from its payload) — it appears on the next page fetch or re-search, the contract's fetch-side absorption.
+- **Brand compliance** — palette, type, spacing, and component patterns from `brand/design-language.md`; no new tokens.
+
+## 3. Interface
+
+Consumes `server`'s HTTP API and stream; exposes nothing. Module-private: the sync store's API, unit-tested directly.
+
+## 4. Error handling and failure visibility
+
+Every route error renders its envelope's cause and remedy — no generic toasts; the composer keeps content on synchronous rejections; the disconnected indicator is the only degraded-connection surface and clears itself on reconnection; the session-failure condition renders as the transcript's stuck-content banner localizing the affected entries. Console logging is diagnostic only — nothing user-relevant lives solely in the console.
+
+## 5. Test plan
+
+Contract tests (`test_contract_*`, vitest, store and renderers driven directly with fixture events):
+
+1. Sync store: dedup (delivered twice, rendered once) per durable kind; per-scope commit-order application; the resync flow discards tokens and refetches with already-committed entries' rendered nodes preserved — no remount and no interim loading state for them, asserted on node identity; gapless composition against interleaved fixtures.
+2. Delta assembly: head rule (no head → nothing live, durable entry whole), in-order chunk append, terminal swap to the durable entry without duplication.
+3. Turn indicator: per initiator and terminal from fixtures; inference from the flag with a suppressed ephemeral; fetched mid-turn state.
+4. Renderer mapping: every transcript entry kind renders; every binding state renders its `ui` cell — controls presence, and the cell's content too: notes, candidates, and the pending cause each rendered from the payload (asserted per state on both axes); every reachability and freshness state renders, causes included — the degraded bar on Unreachable, the no-telemetry notice on NoTelemetry (asserted per state); failure entries show cause and remedy verbatim; findings render with the three certainty registers asserted visually distinct, and evidence requests as the actionable request card — never certainty-badged (both asserted); a failure entry's retry control fires `retry` and renders its rejections distinctly when raced — busy versus nothing-to-retry (a retry racing a success or resume), each its own message (asserted); unparsed text renders plain.
+5. Staleness judgment and provenance: a fresh-window-bearing value flips its staleness rendering as injected time passes; windowless values never do; provenance captions render on telemetry and evidence per the brand pattern — source and age for live values, camera and capture time for snapshots (asserted on content); the log and config views render with provenance and no fresh window, page their continuations (a truncated section says so and continues; a refused continuation restarts the view), and render the unknown-section and boundary-unknown answers distinctly (asserted).
+6. Composer: synchronous rejections keep content; the attachment cap is surfaced before send at the cap boundary.
+7. Heartbeat watchdog: silence past the window flips the disconnected indicator and triggers reconnection; the indicator clears on resume.
+8. Gallery pagination: an evidence-added event mid-pagination renders once (either page or event, never both); a refused continuation restarts cleanly with no duplicate or lost item; upload progress renders determinate during a mocked slow upload; the session list composes the same way — a session-created or archive-changed event mid-pagination renders once, a refused continuation restarts cleanly (asserted); in an active content search, a created session renders only from a later fetch, never speculatively from the event, while an archive change of a listed result applies live (asserted per the session-store contract's split).
+9. Header chrome: the LOCAL/EXPOSED badge is present on every screen (asserted per screen).
+10. Stuck-content banner: the session-failure condition renders localizing exactly the affected entries, grows as a second entry joins, and clears when the content lands (asserted against events fixtures).
+11. Camera control: the (binding × reachability × discovery) derivation — absent on no-webcam, disabled-with-reason on unknowable discovery, live when bound with cameras, the picker with several; each of the six refusal reasons renders distinctly — the two agent-path reasons asserted distinct from each other; the transient fetch failure renders its cause with a retry offered, and capture-failed renders camera-named, the two asserted distinct from each other and from every refusal; a camera-choice-changed event updates every device's picker (asserted per state and reason).
+12. Session list and config: search filters live, archive hides and unarchive restores with reopen working, and the show-archived selector reveals archived sessions in the list and in search (asserted on both), a still-archived session located via the selector reopening unchanged with its full history (asserted — R4's harder half, no unarchive required); create-with-first-message lands in the new session; the config surface renders the location-unset state with the set control as its remedy, a successful set clearing the state live — no restart — and a set-route error rendering its envelope (asserted).
+
+Failure-mode tests (`test_failure_<dependency>_<mode>`) — the one dependency is `server`:
+
+- `fetch_error` per route family (envelope rendered with cause and remedy).
+- `stream_drop` (reconnect with held token, replay applied).
+- `resync_signal` (refetch path).
+- `server_unreachable` (disconnected state, recovery on return).
+
+Provisional mocks — unverified: none. Unit tests run against fixture events and scripted fetch responses derived from the contracts; the real wire is covered end-to-end via Playwright.
